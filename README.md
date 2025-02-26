@@ -19,4 +19,3 @@ This repository contains a microservices-based online event booking system.
 
 ## 📜 License
 This project is for academic purposes (CS4067 - DevOps).
-EOL
