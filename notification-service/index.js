@@ -1,30 +1,29 @@
-const path = require("path");
-const dotenv = require("dotenv");
-
-// ✅ Force-load .env file using absolute path
-dotenv.config({ path: path.join(__dirname, ".env") });
-
+require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-
-console.log("Loaded PORT:", process.env.PORT); // Debugging output
+const connectDB = require("./db");
+const { consumeMessages } = require("./rabbitmq");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
-app.use(morgan("dev"));
 
-const PORT = process.env.PORT || 5000;
+// Connect to MongoDB
+connectDB();
 
-app.listen(PORT, () => {
-    console.log(`Notification Service running on port ${PORT}`);
+// Start RabbitMQ Consumer
+consumeMessages();
+
+// API to get all notifications
+const Notification = require("./models/Notification");
+app.get("/notifications", async (req, res) => {
+    try {
+        const notifications = await Notification.find();
+        res.json(notifications);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-
-const mongoose = require("mongoose");
-// require("dotenv").config();
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("Connected to MongoDB ✅"))
-  .catch(err => console.error("MongoDB Connection Error ❌", err));
+const PORT = process.env.PORT || 5004;
+app.listen(PORT, () => {
+    console.log(`🚀 Notification Service running on port ${PORT}`);
+});
