@@ -1,76 +1,73 @@
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
+import { useState, useEffect } from "react";
 
-// const Booking = () => {
-//   const [bookings, setBookings] = useState([]);
-//   const [formData, setFormData] = useState({ userId: "", eventId: "", status: "pending", paymentStatus: "unpaid" });
+const Booking = () => {
+  const [bookings, setBookings] = useState([]);
+  const userId = localStorage.getItem("userId"); // Get logged-in user ID
 
-//   // Fetch all bookings
-//   useEffect(() => {
-//     const fetchBookings = async () => {
-//       try {
-//         const res = await axios.get("http://localhost:5003/bookings");
-//         setBookings(res.data);
-//       } catch (error) {
-//         console.error("Error fetching bookings:", error);
-//       }
-//     };
-//     fetchBookings();
-//   }, []);
+  useEffect(() => {
+    fetch("http://localhost:5003/bookings")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched Bookings Data:", data); // Debugging
 
-//   // Handle input change
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
+        // Filter bookings to show only those for the logged-in user
+        const userBookings = data.filter((booking) => booking.userId === userId);
+        setBookings(userBookings);
+      })
+      .catch((error) => console.error("Error fetching bookings:", error));
+  }, [userId]);
 
-//   // Create a new booking
-//   const createBooking = async () => {
-//     try {
-//       await axios.post("http://localhost:5003/bookings", formData);
-//       setFormData({ userId: "", eventId: "", status: "pending", paymentStatus: "unpaid" });
-//       window.location.reload(); // Refresh to see the new booking
-//     } catch (error) {
-//       console.error("Error creating booking:", error);
-//     }
-//   };
+  // Function to update payment status to "paid"
+  const markAsPaid = async (bookingId) => {
+    try {
+      const response = await fetch(`http://localhost:5003/bookings/${bookingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus: "paid" }),
+      });
 
-//   // Delete a booking
-//   const deleteBooking = async (id) => {
-//     try {
-//       await axios.delete(`http://localhost:5003/bookings/${id}`);
-//       setBookings(bookings.filter((booking) => booking.id !== id));
-//     } catch (error) {
-//       console.error("Error deleting booking:", error);
-//     }
-//   };
+      if (!response.ok) throw new Error("Failed to update payment status");
 
-//   return (
-//     <div className="p-6 max-w-2xl mx-auto">
-//       <h2 className="text-2xl font-bold mb-4">Booking Management</h2>
+      // Update state to reflect payment change
+      setBookings(bookings.map((booking) =>
+        booking.id === bookingId ? { ...booking, paymentStatus: "paid" } : booking
+      ));
 
-//       {/* Booking Form */}
-//       <div className="mb-4">
-//         <input type="text" name="userId" placeholder="User ID" value={formData.userId} onChange={handleChange} className="border p-2 rounded mr-2" />
-//         <input type="text" name="eventId" placeholder="Event ID" value={formData.eventId} onChange={handleChange} className="border p-2 rounded mr-2" />
-//         <button onClick={createBooking} className="bg-blue-500 text-white px-4 py-2 rounded">Create Booking</button>
-//       </div>
+      alert("✅ Payment marked as paid!");
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+    }
+  };
 
-//       {/* Booking List */}
-//       <ul className="space-y-3">
-//         {bookings.map((booking) => (
-//           <li key={booking.id} className="border p-3 rounded flex justify-between items-center">
-//             <div>
-//               <p><strong>User ID:</strong> {booking.userId}</p>
-//               <p><strong>Event ID:</strong> {booking.eventId}</p>
-//               <p><strong>Status:</strong> {booking.status}</p>
-//               <p><strong>Payment:</strong> {booking.paymentStatus}</p>
-//             </div>
-//             <button onClick={() => deleteBooking(booking.id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
+  return (
+    <div className="max-w-3xl mx-auto mt-10 p-5 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-5">Your Bookings</h2>
+      {bookings.length > 0 ? (
+        <ul>
+          {bookings.map((booking) => (
+            <li key={booking.id} className="p-3 border-b">
+              <strong>Booking ID:</strong> {booking.id} <br />
+              <strong>Status:</strong> {booking.status} <br />
+              <strong>Payment:</strong> {booking.paymentStatus} <br />
+              <strong>Date:</strong> {new Date(booking.createdAt).toLocaleString()} <br />
+              
+              {/* Show "Mark as Paid" button only if paymentStatus is "unpaid" */}
+              {booking.paymentStatus === "unpaid" && (
+                <button 
+                  className="bg-green-500 text-black px-3 py-1 rounded mt-2"
+                  onClick={() => markAsPaid(booking.id)}
+                >
+                  Mark as Paid
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No bookings available.</p>
+      )}
+    </div>
+  );
+};
 
-// export default Booking;
+export default Booking;

@@ -35,3 +35,53 @@
 // };
 
 // export default Notifications;
+
+
+
+
+
+
+
+
+
+
+
+import { useState, useEffect } from "react";
+
+const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
+  const userId = localStorage.getItem("userId"); // Get logged-in user ID
+
+  useEffect(() => {
+    fetch("http://localhost:5004/notifications")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched Notifications:", data); // Debugging
+
+        // Filter notifications to show only those for the logged-in user
+        const userNotifications = data.filter((notification) => notification.userId === userId);
+        setNotifications(userNotifications);
+      })
+      .catch((error) => console.error("Error fetching notifications:", error));
+  }, [userId]);
+
+  return (
+    <div className="max-w-3xl mx-auto mt-10 p-5 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-5">Notifications</h2>
+      {notifications.length > 0 ? (
+        <ul>
+          {notifications.map((notification) => (
+            <li key={notification.id} className="p-3 border-b">
+              <strong>Message:</strong> {notification.message} <br />
+              <strong>Time:</strong> {new Date(notification.createdAt).toLocaleString()}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No new notifications.</p>
+      )}
+    </div>
+  );
+};
+
+export default Notifications;

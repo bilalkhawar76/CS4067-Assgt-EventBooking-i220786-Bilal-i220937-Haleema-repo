@@ -18,34 +18,51 @@ router.post("/register", async (req, res) => {
 });
 
 // User login
-// User login
+// // User login
+// router.post("/login", async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     console.log(`🟢 Login attempt for: ${email}`);
+
+//     const user = await User.findOne({ where: { email } });
+
+//     if (!user) {
+//       console.log("🔴 User not found!");
+//       return res.status(401).json({ error: "Invalid credentials" });
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(password, user.password);
+//     if (!isPasswordValid) {
+//       console.log("🔴 Incorrect password!");
+//       return res.status(401).json({ error: "Invalid credentials" });
+//     }
+
+//     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+//     console.log("✅ Login successful!");
+    
+//     res.json({ token });
+//   } catch (error) {
+//     console.error("❌ Server error:", error);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(`🟢 Login attempt for: ${email}`);
-
     const user = await User.findOne({ where: { email } });
 
-    if (!user) {
-      console.log("🔴 User not found!");
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      console.log("🔴 Incorrect password!");
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    console.log("✅ Login successful!");
-    
-    res.json({ token });
+
+    res.json({ token, userId: user.id }); // 🔥 Return userId along with token
   } catch (error) {
-    console.error("❌ Server error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 
 // Get user profile
