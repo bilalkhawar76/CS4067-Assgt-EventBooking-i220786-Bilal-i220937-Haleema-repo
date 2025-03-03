@@ -17,5 +17,11 @@ This repository contains a microservices-based online event booking system.
    \`\`\`
 2. Navigate to the respective microservice folder and follow its setup instructions.
 
+
+## Architectural Diagram
+This module contains the implementation of the main functionality.
+
+![Architecture Diagram](docs/images/Architecture Diagram.png)
+
 ## 📜 License
 This project is for academic purposes (CS4067 - DevOps).
