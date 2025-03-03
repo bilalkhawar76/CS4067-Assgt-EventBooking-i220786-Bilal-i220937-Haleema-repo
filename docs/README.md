@@ -2,6 +2,13 @@
 This repository contains all the images related to Jira and Github integration.
 This README file has all the images in a doccumented form
 
+## Link for Jira Board
+This link has limited access, works only for those who have been allowed:<br/>
+https://nu-team-bilal.atlassian.net/jira/software/projects/CII/boards/2
+
+## Github-Jira Integration
+![Github-Jira Integration](images/JiraGithub.png)
+
 ## Issues in Github Repository
 ![Github Repo Issues](images/GithubRepoIssues.png)
 
@@ -16,4 +23,3 @@ This README file has all the images in a doccumented form
 
 ## Issues in Jira Sprint
 ![Issues in Jira Sprint](images/JiraIssues2.png)
-
